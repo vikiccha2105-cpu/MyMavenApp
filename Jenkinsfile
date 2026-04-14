@@ -7,11 +7,8 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/vikiccha2105-cpu/MyMavenApp.git'
-            }
-        }
+        // ❗ REMOVE manual checkout (Jenkins already does it)
+        // If you still want manual control, fix branch to 'master'
 
         stage('Build') {
             steps {
@@ -31,10 +28,15 @@ pipeline {
             }
         }
 
-        // ❗ Optional (safe version)
         stage('Run Application') {
             steps {
-                sh 'nohup java -jar target/MyMavenApp-1.0-SNAPSHOT.jar &'
+                sh '''
+                if pgrep -f MyMavenApp.jar; then
+                    echo "App already running"
+                else
+                    nohup java -jar target/*.jar > app.log 2>&1 &
+                fi
+                '''
             }
         }
     }
